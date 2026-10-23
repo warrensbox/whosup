@@ -55,7 +55,7 @@ func testModel(f *fakeProc) model {
 	m.poll = time.Millisecond
 	m.stop = func(pid int) error { f.stopped = pid; return f.stopErr }
 	m.kill = func(pid int) error { f.killed = pid; return nil }
-	m.alive = func(pid int) bool {
+	m.alive = func(_ int) bool {
 		if f.killed != 0 {
 			return f.ignoreKill
 		}

@@ -27,7 +27,8 @@ func addStats(list []Port) {
 	for _, p := range list {
 		pids = append(pids, strconv.Itoa(p.PID))
 	}
-	out, _ := exec.Command("ps", "-o", "pid=,%cpu=,rss=,comm=", "-p", strings.Join(pids, ",")).Output()
+	// ps exits non-zero if any PID has gone, but still prints the rest.
+	out, _ := exec.Command("ps", "-o", "pid=,%cpu=,rss=,comm=", "-p", strings.Join(pids, ",")).Output() //nolint:errcheck,gosec // see above; the only variable args are PIDs from strconv.Itoa
 	all := parseStats(out)
 	for i := range list {
 		s, ok := all[list[i].PID]
