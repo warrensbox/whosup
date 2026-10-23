@@ -108,3 +108,48 @@ jobs:
           MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }} # zizmor: ignore[secrets-outside-env]
           MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }} # zizmor: ignore[secrets-outside-env]
           MACOS_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }} # zizmor: ignore[secrets-outside-env]
+
+  # Publish www/ to GitHub Pages once the release has succeeded, so the
+  # site always matches the latest release.
+  docs-deploy:
+    needs: whosup-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Install Python
+      - name: Install Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: 3.x
+
+      - name: Install Zensical
+        run: pip install zensical==0.0.71
+
+      # Build WWW page
+      - name: Build page
+        working-directory: www
+        run: zensical build --clean --strict
+
+      - name: Upload page
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: www/site
+
+      - name: Deploy page
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

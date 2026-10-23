@@ -2,3 +2,6 @@ bin/
 dist/
 whosup
 completions/
+www/site/
+www/.cache/
+www/.venv/

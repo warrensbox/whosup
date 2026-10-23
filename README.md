@@ -5,11 +5,32 @@ Because nobody remembers lsof -ti:8080 | xargs kill.
 
 ## Install
 
+### Homebrew
+
+```sh
+brew install --cask warrensbox/tap/whosup
+```
+
+![Installing whosup](www/docs/assets/install-whosup.gif)
+
+This also installs shell completions for bash, zsh and fish.
+
+To upgrade or remove it:
+
+```sh
+brew upgrade --cask whosup
+brew uninstall --cask whosup
+```
+
+> **Note:** Homebrew on Linux needs at least Homebrew 5.0.6 to install casks.
+
+### Go
+
 ```sh
 go install github.com/warrensbox/whosup@latest
 ```
 
-Or build from source:
+### From source
 
 ```sh
 git clone https://github.com/warrensbox/whosup.git
@@ -26,6 +47,8 @@ whosup -u             # only services you started (also --user)
 whosup -p 8080        # show what's on one port (also --port)
 whosup -p 8080 -q     # print only the PID(s) on that port (also --pid)
 ```
+
+![Stopping a service on a local port with whosup](www/docs/assets/stop-port-local-whosup.gif)
 
 ### Keys
 
