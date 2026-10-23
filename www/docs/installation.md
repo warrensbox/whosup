@@ -3,7 +3,7 @@
 ## Homebrew
 
 ```sh
-brew install --cask warrensbox/tap/whosup
+brew install warrensbox/tap/whosup
 ```
 
 ![Installing whosup](assets/images/install-whosup.gif)
@@ -13,8 +13,8 @@ This also installs shell completions for Bash, Zsh and fish.
 To upgrade or remove it:
 
 ```sh
-brew upgrade --cask whosup
-brew uninstall --cask whosup
+brew upgrade whosup
+brew uninstall whosup
 ```
 
 !!! note

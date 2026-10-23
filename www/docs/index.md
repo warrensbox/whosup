@@ -6,7 +6,7 @@ Because nobody remembers `lsof -ti:8080 | xargs kill`.
 ## Quick start
 
 ```sh
-brew install --cask warrensbox/tap/whosup
+brew install warrensbox/tap/whosup
 
 whosup -v
 ```

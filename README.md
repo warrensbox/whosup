@@ -12,14 +12,14 @@ Because nobody remembers lsof -ti:8080 | xargs kill.
 For macOS or various Linux distributions, Homebrew offers the simplest installation process. <a href="https://brew.sh/" target="_blank">If you do not have Homebrew installed, click here</a>.
 
 ```sh
-brew install --cask warrensbox/tap/whosup
+brew install warrensbox/tap/whosup
 ```
 
 To upgrade or remove it:
 
 ```sh
-brew upgrade --cask whosup
-brew uninstall --cask whosup
+brew upgrade whosup
+brew uninstall whosup
 ```
 
 > **Note:** Homebrew on Linux needs at least Homebrew 5.0.6 to install casks.
