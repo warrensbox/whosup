@@ -15,14 +15,20 @@ For macOS or various Linux distributions, Homebrew offers the simplest installat
 brew install warrensbox/tap/whosup
 ```
 
-To upgrade or remove it:
-
-```sh
-brew upgrade whosup
-brew uninstall whosup
-```
 
 > **Note:** Homebrew on Linux needs at least Homebrew 5.0.6 to install casks.
+
+### Linux
+
+Installs the latest release into `/usr/local/bin`. It works on macOS too.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/warrensbox/whosup/main/install.sh | sudo sh
+```
+
+The script checks the download against the release's SHA-256 checksums before installing.
+
+See more installation options [here](https://whosup.warrensbox.com)
 
 ## Usage
 
