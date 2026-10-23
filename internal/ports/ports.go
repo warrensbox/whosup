@@ -59,7 +59,10 @@ func parse(out []byte) []Port {
 		if err != nil {
 			continue
 		}
-		pid, _ := strconv.Atoi(f[1])
+		pid, err := strconv.Atoi(f[1])
+		if err != nil {
+			continue
+		}
 		key := f[1] + name
 		if seen[key] {
 			continue

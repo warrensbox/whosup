@@ -19,7 +19,10 @@ func TestRefusesSpecialPIDs(t *testing.T) {
 func TestStopAndKill(t *testing.T) {
 	// A child that ignores SIGTERM, so only Kill ends it.
 	cmd := exec.Command("sh", "-c", "trap '' TERM; echo ready; while :; do sleep 0.1; done")
-	out, _ := cmd.StdoutPipe()
+	out, err := cmd.StdoutPipe()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -29,7 +32,7 @@ func TestStopAndKill(t *testing.T) {
 	}
 	pid := cmd.Process.Pid
 	done := make(chan struct{})
-	go func() { cmd.Wait(); close(done) }()
+	go func() { cmd.Wait(); close(done) }() //nolint:errcheck // the child is killed, so Wait always errors
 
 	if !Alive(pid) {
 		t.Fatal("child should be alive")

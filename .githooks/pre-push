@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Stops the push if any Markdown file isn't formatted with prettier.
+# Install with: make hooks. Skip once with: git push --no-verify
+set -euo pipefail
+
+PRETTIER="prettier@3.9.10"
+
+if ! command -v npx >/dev/null; then
+	echo "pre-push: npx not found; install Node.js or push with --no-verify." >&2
+	exit 1
+fi
+
+shopt -s nullglob
+if ! npx --yes "$PRETTIER" --check -- README.md www/docs/*.md; then
+	echo "pre-push: run 'npx $PRETTIER --write README.md www/docs/*.md' and commit the result." >&2
+	exit 1
+fi

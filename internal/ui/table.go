@@ -93,69 +93,28 @@ type model struct {
 
 func (m model) Init() tea.Cmd { return nil }
 
+// Key names used in more than one place.
+const (
+	keyEnter = "enter"
+	keyEsc   = "esc"
+)
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		if m.dialog != noDialog {
 			return m.updateDialog(msg)
 		}
-		switch msg.String() {
-		case "q", "esc", "ctrl+c":
-			return m, tea.Quit
-		case "up", "k":
-			m.moveCursor(-1)
-		case "down", "j":
-			m.moveCursor(1)
-		case "enter":
-			if len(m.list) > 0 {
-				m.dialog, m.yes, m.target = stopDialog, false, m.list[m.cursor] // default to No
-			}
-		case "m":
-			if len(m.list) > 0 {
-				m.dialog, m.target = detailsDialog, m.list[m.cursor]
-			}
-		case "r":
-			return m, refresh
-		}
-		return m, nil
+		return m.updateTable(msg)
 	case tea.WindowSizeMsg:
 		// Each row takes two lines (row + separator). Leave room for the
 		// top/bottom border, header, header separator, status and help line.
 		m.height = max((msg.Height-5)/2, 1)
 		m.moveCursor(0)
 	case signalMsg:
-		if msg.err != nil {
-			verb := "stop"
-			if msg.forced {
-				verb = "force kill"
-			}
-			m.showResult(true, "Could not %s %s:\n%v", verb, name(msg.port), msg.err)
-			return m, nil
-		}
-		return m, m.check(msg.port, msg.forced, 1)
+		return m.onSignal(msg)
 	case checkMsg:
-		m.tries = msg.tries
-		if !m.alive(msg.port.PID) {
-			verb := "Stopped"
-			if msg.forced {
-				verb = "Force killed"
-			}
-			m.showResult(false, "✓ %s %s", verb, name(msg.port))
-			return m, refresh
-		}
-		limit := stopTries
-		if msg.forced {
-			limit = killTries
-		}
-		if msg.tries < limit {
-			return m, m.check(msg.port, msg.forced, msg.tries+1)
-		}
-		if !msg.forced {
-			m.dialog, m.yes = killDialog, false
-			return m, nil
-		}
-		m.showResult(true, "%s is still running\nafter a force kill.", name(msg.port))
-		return m, refresh
+		return m.onCheck(msg)
 	case refreshMsg:
 		load := m.load
 		return m, func() tea.Msg {
@@ -172,6 +131,68 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 	return m, nil
+}
+
+// updateTable handles keys while no dialog is open.
+func (m model) updateTable(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "q", keyEsc, "ctrl+c":
+		return m, tea.Quit
+	case "up", "k":
+		m.moveCursor(-1)
+	case "down", "j":
+		m.moveCursor(1)
+	case keyEnter:
+		if len(m.list) > 0 {
+			m.dialog, m.yes, m.target = stopDialog, false, m.list[m.cursor] // default to No
+		}
+	case "m":
+		if len(m.list) > 0 {
+			m.dialog, m.target = detailsDialog, m.list[m.cursor]
+		}
+	case "r":
+		return m, refresh
+	}
+	return m, nil
+}
+
+// onSignal handles the result of sending SIGTERM or SIGKILL.
+func (m model) onSignal(msg signalMsg) (tea.Model, tea.Cmd) {
+	if msg.err != nil {
+		verb := "stop"
+		if msg.forced {
+			verb = "force kill"
+		}
+		m.showResult(true, "Could not %s %s:\n%v", verb, name(msg.port), msg.err)
+		return m, nil
+	}
+	return m, m.check(msg.port, msg.forced, 1)
+}
+
+// onCheck handles a poll of whether the signalled process has exited.
+func (m model) onCheck(msg checkMsg) (tea.Model, tea.Cmd) {
+	m.tries = msg.tries
+	if !m.alive(msg.port.PID) {
+		verb := "Stopped"
+		if msg.forced {
+			verb = "Force killed"
+		}
+		m.showResult(false, "✓ %s %s", verb, name(msg.port))
+		return m, refresh
+	}
+	limit := stopTries
+	if msg.forced {
+		limit = killTries
+	}
+	if msg.tries < limit {
+		return m, m.check(msg.port, msg.forced, msg.tries+1)
+	}
+	if !msg.forced {
+		m.dialog, m.yes = killDialog, false
+		return m, nil
+	}
+	m.showResult(true, "%s is still running\nafter a force kill.", name(msg.port))
+	return m, refresh
 }
 
 // moveCursor moves the selection by delta and scrolls to keep it visible.
@@ -195,7 +216,7 @@ func (m model) updateDialog(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil // wait for the outcome
 	case resultDialog, detailsDialog:
 		switch msg.String() {
-		case "enter", "esc", "q", " ", "m":
+		case keyEnter, keyEsc, "q", " ", "m":
 			m.dialog = noDialog
 		}
 		return m, nil
@@ -206,10 +227,10 @@ func (m model) updateDialog(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "y":
 		m.yes = true
 		return m.confirm()
-	case "n", "esc", "q":
+	case "n", keyEsc, "q":
 		m.yes = false
 		return m.confirm()
-	case "enter":
+	case keyEnter:
 		return m.confirm()
 	}
 	return m, nil

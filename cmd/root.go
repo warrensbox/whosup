@@ -21,7 +21,7 @@ var rootCmd = &cobra.Command{
 	Use:   "whosup",
 	Short: "whosup shows which ports are in use",
 	Args:  cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		if pidOnly && !cmd.Flags().Changed("port") {
 			return fmt.Errorf("--pid requires --port")
 		}

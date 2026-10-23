@@ -20,8 +20,11 @@ func addDirs(list []Port) {
 		pids = append(pids, strconv.Itoa(p.PID))
 	}
 	// lsof exits non-zero if any PID can't be read, but still prints the rest.
-	out, _ := exec.Command("lsof", "-a", "-p", strings.Join(pids, ","), "-d", "cwd", "-Fn").Output()
-	home, _ := os.UserHomeDir()
+	out, _ := exec.Command("lsof", "-a", "-p", strings.Join(pids, ","), "-d", "cwd", "-Fn").Output() //nolint:errcheck,gosec // see above; the only variable args are PIDs from strconv.Itoa
+	home, err := os.UserHomeDir()
+	if err != nil {
+		home = "" // leave paths unshortened
+	}
 	dirs := parseDirs(out)
 	for i := range list {
 		dir, ok := dirs[list[i].PID]
@@ -45,7 +48,10 @@ func parseDirs(out []byte) map[int]string {
 		}
 		switch line[0] {
 		case 'p':
-			pid, _ = strconv.Atoi(line[1:])
+			var err error
+			if pid, err = strconv.Atoi(line[1:]); err != nil {
+				pid = 0 // skip this process's lines
+			}
 		case 'n':
 			if pid != 0 {
 				dirs[pid] = line[1:]
