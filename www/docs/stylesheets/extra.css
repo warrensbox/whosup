@@ -1,0 +1,9 @@
+/* Brand color, matching the highlight in the whosup table. Used by the
+   "custom" primary and accent colors in zensical.toml. */
+:root > * {
+  --md-primary-fg-color: #2277cc;
+  --md-primary-fg-color--light: #4f94d8;
+  --md-primary-fg-color--dark: #1a5ea1;
+  --md-accent-fg-color: #2277cc;
+  --md-accent-fg-color--transparent: rgba(34, 119, 204, 0.1);
+}
