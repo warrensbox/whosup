@@ -6,7 +6,7 @@
 brew install warrensbox/tap/whosup
 ```
 
-![Installing whosup](assets/images/install-whosup.gif)
+![Installing whosup](assets/install-whosup.gif)
 
 This also installs shell completions for Bash, Zsh and fish.
 

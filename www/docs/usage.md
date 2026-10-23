@@ -8,7 +8,7 @@ whosup -p 8080 -q     # print only the PID(s) on that port (also --pid)
 ```
 
 
-![Installing whosup](assets/images/stop-port-local-whosup.gif)
+![Stopping a service on a local port with whosup](assets/stop-port-local-whosup.gif)
 
 ## Keys
 
