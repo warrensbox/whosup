@@ -6,7 +6,10 @@ Because nobody remembers lsof -ti:8080 | xargs kill.
 ## Installation
 
 `whosup` is available as a binary and on various package managers (eg. Homebrew).
+
 ### Homebrew
+
+For macOS or various Linux distributions, Homebrew offers the simplest installation process. <a href="https://brew.sh/" target="_blank">If you do not have Homebrew installed, click here</a>.
 
 ```sh
 brew install --cask warrensbox/tap/whosup
