@@ -68,4 +68,3 @@ In the stop dialog, use `←` / `→` to choose, `enter` to confirm, or `y` / `n
 - `-u` / `--user` hides processes owned by other users and programs that ship with the OS (anything under `/System`, `/usr/libexec`, `/usr/sbin`, `/sbin`, `/usr/lib` or `/lib`). `-p` ignores it and always shows whatever is on the port.
 - Without `sudo`, only your own processes are shown in full. Others may be missing or show `-`.
 - Only TCP ports that are listening are shown. UDP isn't included.
-

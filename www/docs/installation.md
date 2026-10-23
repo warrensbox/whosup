@@ -18,7 +18,7 @@ brew uninstall --cask whosup
 ```
 
 !!! note
-    Homebrew on Linux needs at least Homebrew 5.0.6 to install casks.
+Homebrew on Linux needs at least Homebrew 5.0.6 to install casks.
 
 ## Go
 
