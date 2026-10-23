@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Formats the Markdown files being committed with prettier, then stages the
+# result so the formatting lands in the same commit.
+# Install with: make hooks. Skip once with: git commit --no-verify
+set -euo pipefail
+
+PRETTIER="prettier@3.9.10"
+
+files=()
+while IFS= read -r -d '' f; do
+	case "$f" in
+	README.md | www/docs/*.md)
+		# www/docs/*.md only, not subfolders, matching the shell glob.
+		[[ "${f#www/docs/}" == */* ]] || files+=("$f")
+		;;
+	esac
+done < <(git diff --cached --name-only -z --diff-filter=ACMR)
+
+[ ${#files[@]} -eq 0 ] && exit 0
+
+if ! command -v npx >/dev/null; then
+	echo "pre-commit: npx not found; install Node.js or commit with --no-verify." >&2
+	exit 1
+fi
+
+npx --yes "$PRETTIER" --write -- "${files[@]}"
+git add -- "${files[@]}"

@@ -3,17 +3,14 @@
 See what's running on your ports, and stop it.
 Because nobody remembers lsof -ti:8080 | xargs kill.
 
-## Install
+## Installation
 
+`whosup` is available as a binary and on various package managers (eg. Homebrew).
 ### Homebrew
 
 ```sh
 brew install --cask warrensbox/tap/whosup
 ```
-
-![Installing whosup](www/docs/assets/install-whosup.gif)
-
-This also installs shell completions for Bash, Zsh and fish.
 
 To upgrade or remove it:
 
@@ -23,21 +20,6 @@ brew uninstall --cask whosup
 ```
 
 > **Note:** Homebrew on Linux needs at least Homebrew 5.0.6 to install casks.
-
-### Go
-
-```sh
-go install github.com/warrensbox/whosup@latest
-```
-
-### From source
-
-```sh
-git clone https://github.com/warrensbox/whosup.git
-cd whosup
-make build
-./whosup
-```
 
 ## Usage
 
