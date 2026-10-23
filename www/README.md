@@ -20,7 +20,7 @@ source .venv/bin/activate
 pip install zensical==0.0.71
 ```
 
-Use the same Zensical version as the release workflow (`.github/workflows/release.yml`), so what you see locally matches what gets published.
+Use the same Zensical version as the publish workflow (`.github/workflows/docs.yml`), so what you see locally matches what gets published.
 
 ## Preview your changes
 
@@ -56,4 +56,4 @@ This is the same build the release workflow runs. `--strict` fails on warnings, 
 
 ## Publishing
 
-You don't publish the site by hand. When a release runs (Actions → **Release (Manual Step)**), the `docs-deploy` job builds this folder and publishes it to GitHub Pages, after the release itself succeeds. Changes merged to `main` go live with the next release.
+You don't publish the site by hand. When changes to `www/` are merged to `main`, the **Publish website** workflow (`.github/workflows/docs.yml`) builds this folder and publishes it to GitHub Pages. To republish without a change, run it from Actions → **Publish website** → **Run workflow**.
