@@ -1,6 +1,6 @@
 # whosup
 
-See what's running on your ports, and stop it. 
+See what's running on your ports, and stop it.
 Because nobody remembers lsof -ti:8080 | xargs kill.
 
 ## Install
@@ -13,7 +13,7 @@ brew install --cask warrensbox/tap/whosup
 
 ![Installing whosup](www/docs/assets/install-whosup.gif)
 
-This also installs shell completions for bash, zsh and fish.
+This also installs shell completions for Bash, Zsh and fish.
 
 To upgrade or remove it:
 
@@ -52,14 +52,14 @@ whosup -p 8080 -q     # print only the PID(s) on that port (also --pid)
 
 ### Keys
 
-| Key | Action |
-|---|---|
-| `↑` / `k` | Move up |
-| `↓` / `j` | Move down |
-| `m` | Show the row's full details |
-| `r` | Refresh the list |
-| `enter` | Stop the selected service |
-| `q` / `esc` | Quit |
+| Key         | Action                      |
+| ----------- | --------------------------- |
+| `↑` / `k`   | Move up                     |
+| `↓` / `j`   | Move down                   |
+| `m`         | Show the row's full details |
+| `r`         | Refresh the list            |
+| `enter`     | Stop the selected service   |
+| `q` / `esc` | Quit                        |
 
 In the stop dialog, use `←` / `→` to choose, `enter` to confirm, or `y` / `n` as shortcuts. The dialog defaults to **No**.
 

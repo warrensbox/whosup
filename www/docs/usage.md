@@ -12,14 +12,14 @@ whosup -p 8080 -q     # print only the PID(s) on that port (also --pid)
 
 ## Keys
 
-| Key | Action |
-|---|---|
-| `↑` / `k` | Move up |
-| `↓` / `j` | Move down |
-| `m` | Show the row's full details |
-| `r` | Refresh the list |
-| `enter` | Stop the selected service |
-| `q` / `esc` | Quit |
+| Key         | Action                      |
+| ----------- | --------------------------- |
+| `↑` / `k`   | Move up                     |
+| `↓` / `j`   | Move down                   |
+| `m`         | Show the row's full details |
+| `r`         | Refresh the list            |
+| `enter`     | Stop the selected service   |
+| `q` / `esc` | Quit                        |
 
 In the stop dialog, use `←` / `→` to choose, `enter` to confirm, or `y` / `n` as shortcuts. The dialog defaults to **No**.
 
