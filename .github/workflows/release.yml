@@ -1,0 +1,110 @@
+name: Release (Manual Step)
+permissions: {} # yamllint disable-line rule:braces
+
+on:
+  workflow_dispatch:
+    inputs:
+      #checkov:skip=CKV_GHA_7: This is a manual step intended for user input
+      name:
+        description: "Enter - major, minor, patch"
+        default: "patch"
+
+jobs:
+  whosup-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check if provided input is valid
+        run: |
+          echo "Semantic Version: ${GH_EVENT_INPUTS_NAME}"
+          VERSION="${GH_EVENT_INPUTS_NAME}"
+          if [ "$VERSION" != "major" ] && [ "$VERSION" != "minor" ] && [ "$VERSION" != "patch" ]; then
+              echo "Error: Provided input string must be 'major', 'minor', or 'patch'"
+              exit 1
+          fi
+        env:
+          GH_EVENT_INPUTS_NAME: ${{ github.event.inputs.name }}
+
+      # Checkout code from repo
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true # zizmor: ignore[artipacked] # required to push the new tag
+          ref: ${{ github.head_ref }} # required for better experience using pre-releases
+          fetch-depth: "0"
+
+      # Install Go
+      - name: Install Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: "go.mod"
+          cache: false
+
+      # Double check Go version
+      - name: Go version
+        id: Version
+        run: go version
+
+      # Download Go dependencies
+      - name: Go download
+        run: go mod download
+
+      # Test to see if whosup works with --help
+      - name: Go build
+        env:
+          CGO_ENABLED: 0 # Build statically linked binaries
+        run: mkdir -p build && go build -v -o build/whosup && build/whosup --help
+        continue-on-error: false
+
+      - name: Create dry tag
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
+        id: semver-tag-dry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          INITIAL_VERSION: 0.0.0
+          RELEASE_BRANCHES: main
+          DEFAULT_BUMP: ${{ github.event.inputs.name }}
+          PRERELEASE: false
+          DRY_RUN: true # Only get the tag - dry
+          VERBOSE: false
+
+      # Echo version
+      - name: Echo version
+        run: |
+          echo "${GH_STEPS_SEMVER_TAG_DRY_OUTPUTS_TAG}"
+        env:
+          GH_STEPS_SEMVER_TAG_DRY_OUTPUTS_TAG: ${{ steps.semver-tag-dry.outputs.tag }}
+
+      # Introduce new tag (for real)
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
+        id: semver-tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          INITIAL_VERSION: 0.0.0
+          RELEASE_BRANCHES: main
+          DEFAULT_BUMP: ${{ github.event.inputs.name }}
+          PRERELEASE: false
+          DRY_RUN: false # Not dry
+          VERBOSE: true
+
+      # Run goreleaser to create new binaries
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ steps.semver-tag.outputs.tag }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }} # zizmor: ignore[secrets-outside-env]
+          NO_CREATE_CHANGELOG: false
+          MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }} # zizmor: ignore[secrets-outside-env]
+          MACOS_SIGN_PASSWORD: ${{ secrets.MACOS_SIGN_PASSWORD }} # zizmor: ignore[secrets-outside-env]
+          MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }} # zizmor: ignore[secrets-outside-env]
+          MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }} # zizmor: ignore[secrets-outside-env]
+          MACOS_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }} # zizmor: ignore[secrets-outside-env]

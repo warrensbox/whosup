@@ -111,8 +111,9 @@ func init() {
 	rootCmd.Flags().BoolVarP(&mine, "user", "u", false, "show only services you started (hide OS services)")
 }
 
-// Execute runs the root command.
-func Execute() {
+// Execute runs the root command. version is shown by --version.
+func Execute(version string) {
+	rootCmd.Version = version
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}

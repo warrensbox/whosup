@@ -1,0 +1,19 @@
+name: Update Go Module Index
+permissions: {} # yamllint disable-line rule:braces
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  bump-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: "0" # needed for git describe to find the tag
+      - name: Ping endpoint
+        run: curl "https://proxy.golang.org/github.com/warrensbox/whosup/@v/$(git describe HEAD --tags --abbrev=0).info"

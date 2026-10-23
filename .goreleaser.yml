@@ -1,0 +1,134 @@
+# https://goreleaser.com/
+version: 2
+
+env:
+  - CGO_ENABLED=0  # Build statically linked binaries
+
+before:
+  hooks:
+    - go mod download
+    # Generate shell completions for the archives and the Homebrew cask.
+    - mkdir -p completions
+    - sh -c "go run . completion bash > completions/whosup.bash"
+    - sh -c "go run . completion zsh > completions/_whosup"
+    - sh -c "go run . completion fish > completions/whosup.fish"
+
+builds:
+  -
+    ldflags:
+      - -s -w -X "main.version={{.Env.RELEASE_VERSION}}"
+    main: main.go
+    binary: whosup
+    # whosup relies on lsof and ps, so there is no Windows build.
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - 386
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - 6
+      - 7
+
+# Sign and notarize the macOS binaries with Apple (cross-platform, via quill).
+# Skipped automatically when the signing secrets are not set (forks, local runs).
+notarize:
+  macos:
+    - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+      sign:
+        certificate: "{{ .Env.MACOS_SIGN_P12 }}"
+        password: "{{ .Env.MACOS_SIGN_PASSWORD }}"
+      notarize:
+        issuer_id: "{{ .Env.MACOS_NOTARY_ISSUER_ID }}"
+        key_id: "{{ .Env.MACOS_NOTARY_KEY_ID }}"
+        key: "{{ .Env.MACOS_NOTARY_KEY }}"
+        wait: true
+        timeout: 20m
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{.Env.RELEASE_VERSION}}_checksums.txt'
+
+archives:
+  - id: archives
+    name_template: >-
+      {{- .ProjectName }}_
+      {{- .Env.RELEASE_VERSION }}_
+      {{- .Os }}_
+      {{- .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end -}}
+    files:
+      - LICENSE
+      - README.md
+      - completions/*
+
+homebrew_casks:
+  -
+    name: whosup
+
+    license: MIT
+
+    # Repository to push the tap to
+    repository:
+      owner: warrensbox
+      name: homebrew-tap
+      token: "{{ .Env.PERSONAL_ACCESS_TOKEN }}"
+
+    # Git author used to commit to the repository
+    commit_author:
+      name: Warren Veerasingam
+      email: warren.veerasingam@gmail.com
+
+    caveats: "Run 'whosup' to see what's listening on your ports."
+
+    homepage: "https://github.com/warrensbox/whosup"
+
+    description: "See what's running on your ports, and stop it."
+
+    skip_upload: false
+
+    completions:
+      bash: "completions/whosup.bash"
+      zsh: "completions/_whosup"
+      fish: "completions/whosup.fish"
+
+    hooks:
+      post:
+        # macOS: remove the quarantine bit from the binary
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/whosup"]
+          end
+
+changelog:
+  disable: "{{ .Env.NO_CREATE_CHANGELOG }}"
+
+  # Uses the GitHub compare API, appending the author login to each entry.
+  use: github
+
+  format: "{{ .Message }} ({{ with .AuthorUsername }}@{{ . }}{{ else }}{{ .AuthorName }} <{{ .AuthorEmail }}>{{ end }})"
+
+  # Remove the commit hash from the changelog.
+  abbrev: -1
+
+  # Matched against the first line of the commit message.
+  groups:
+    - title: Features
+      order: 0
+      regexp: '^.*?feat(ure)?(\([[:word:]-]+\))??!?:.+$'  # codespell:ignore ure
+    - title: "Bug fixes"
+      order: 1
+      regexp: '^.*?(bug(fix)?|fix)(\([[:word:]-]+\))??!?:.+$'
+    - title: Documentation
+      order: 2
+      regexp: "^.*?doc(s|umentation).*"
+    - title: Go
+      order: 3
+      regexp: "^go: "
+    - title: Others
+      order: 999
+
+  filters:
+    exclude:
+      - "^.*?Merge pull request "
