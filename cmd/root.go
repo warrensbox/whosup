@@ -15,6 +15,7 @@ var (
 	port    int  // set by -p/--port to show details for a single port
 	pidOnly bool // set by -q/--pid to print only the PIDs on that port
 	mine    bool // set by -u/--user to hide other users' and OS processes
+	udp     bool // set by --udp to include UDP ports
 )
 
 var rootCmd = &cobra.Command{
@@ -30,16 +31,16 @@ var rootCmd = &cobra.Command{
 		}
 		if cmd.Flags().Changed("port") {
 			// Asking for a port always answers, whoever owns it.
-			list, err := ports.List()
+			list, err := ports.List(udp)
 			if err != nil {
 				return err
 			}
 			return showPort(cmd, list, port)
 		}
-		load := ports.List
+		load := func() ([]ports.Port, error) { return ports.List(udp) }
 		if mine {
 			load = func() ([]ports.Port, error) {
-				list, err := ports.List()
+				list, err := ports.List(udp)
 				return ports.UserStarted(list), err
 			}
 		}
@@ -64,7 +65,7 @@ var rootCmd = &cobra.Command{
 		t.SetStyle(table.StyleRounded)
 		t.AppendHeader(table.Row{"Port", "PID", "Command", "Address", "CPU", "Memory", "Directory"})
 		for _, p := range list {
-			t.AppendRow(table.Row{p.Port, p.PID, p.Command, p.Address, p.CPU, p.Memory, p.Dir})
+			t.AppendRow(table.Row{p.Label(), p.PID, p.Command, p.Address, p.CPU, p.Memory, p.Dir})
 		}
 		t.Render()
 		return nil
@@ -81,7 +82,7 @@ func showPort(cmd *cobra.Command, list []ports.Port, port int) error {
 			continue
 		}
 		if pidOnly {
-			// A process listening on both IPv4 and IPv6 appears twice.
+			// A process listening on both IPv4 and IPv6, or TCP and UDP, appears twice.
 			if !seen[p.PID] {
 				fmt.Fprintln(out, p.PID)
 			}
@@ -109,6 +110,7 @@ func init() {
 	rootCmd.Flags().IntVarP(&port, "port", "p", 0, "show details for a single port")
 	rootCmd.Flags().BoolVarP(&pidOnly, "pid", "q", false, "with --port, prints the PID(s), one per line")
 	rootCmd.Flags().BoolVarP(&mine, "user", "u", false, "show only services you started (hide OS services)")
+	rootCmd.Flags().BoolVar(&udp, "udp", false, "also show UDP ports")
 }
 
 // Execute runs the root command. version is shown by --version.

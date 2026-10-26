@@ -19,7 +19,7 @@ builds:
       - -s -w -X "main.version={{.Env.RELEASE_VERSION}}"
     main: main.go
     binary: whosup
-    # whosup relies on lsof and ps, so there is no Windows build.
+    # whosup reads /proc (Linux) and sysctl/proc_info (macOS), so there is no Windows build.
     goos:
       - darwin
       - linux
