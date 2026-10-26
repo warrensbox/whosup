@@ -2,13 +2,6 @@ package ports
 
 import "testing"
 
-func TestParseDirs(t *testing.T) {
-	got := parseDirs([]byte("p636\nfcwd\nn/\np21425\nfcwd\nn/Users/me/app\n"))
-	if got[636] != "/" || got[21425] != "/Users/me/app" {
-		t.Errorf("got %v", got)
-	}
-}
-
 func TestShortenHome(t *testing.T) {
 	cases := map[string]string{
 		"/Users/me":         "~",

@@ -37,6 +37,7 @@ whosup                # interactive table
 whosup -u             # only services you started (also --user)
 whosup -p 8080        # show what's on one port (also --port)
 whosup -p 8080 -q     # print only the PID(s) on that port (also --pid)
+whosup --udp          # include UDP ports, shown as 53/udp
 ```
 
 ![Stopping a service on a local port with whosup](www/docs/assets/stop-port-local-whosup.gif)
@@ -58,4 +59,6 @@ In the stop dialog, use `←` / `→` to choose, `enter` to confirm, or `y` / `n
 
 - `-u` / `--user` hides processes owned by other users and programs that ship with the OS (anything under `/System`, `/usr/libexec`, `/usr/sbin`, `/sbin`, `/usr/lib` or `/lib`). `-p` ignores it and always shows whatever is on the port.
 - Without `sudo`, only your own processes are shown in full. Others may be missing or show `-`.
-- Only TCP ports that are listening are shown. UDP isn't included.
+- By default only listening TCP ports are shown. Add `--udp` to include bound UDP ports too.
+- whosup reads the kernel directly (`/proc` on Linux, `sysctl` and `proc_info` on macOS) and doesn't need `lsof`, `ss`, `netstat` or `ps`.
+- CPU is the average over the process's lifetime, like `ps` on Linux.

@@ -10,6 +10,9 @@ import (
 	"github.com/warrensbox/whosup/internal/ports"
 )
 
+// listTCP is the real loader, as used without --udp.
+func listTCP() ([]ports.Port, error) { return ports.List(false) }
+
 var sample = []ports.Port{
 	{Port: 3000, PID: 100, Command: "node"},
 	{Port: 5432, PID: 200, Command: "postgres"},
@@ -51,7 +54,7 @@ type fakeProc struct {
 }
 
 func testModel(f *fakeProc) model {
-	m := newModel(sample, ports.List)
+	m := newModel(sample, listTCP)
 	m.poll = time.Millisecond
 	m.stop = func(pid int) error { f.stopped = pid; return f.stopErr }
 	m.kill = func(pid int) error { f.killed = pid; return nil }
@@ -203,7 +206,7 @@ func TestScrollKeepsCursorVisible(t *testing.T) {
 	for i := range 10 {
 		list = append(list, ports.Port{Port: 1000 + i, PID: 100 + i, Command: "svc"})
 	}
-	m := newModel(list, ports.List)
+	m := newModel(list, listTCP)
 	m, _ = send(m, tea.WindowSizeMsg{Height: 11}) // room for 3 rows
 	if m.height != 3 {
 		t.Fatalf("height = %d, want 3", m.height)
@@ -244,7 +247,7 @@ func TestLastSegments(t *testing.T) {
 func TestMoreShowsDetails(t *testing.T) {
 	list := []ports.Port{{Port: 5432, PID: 200, Command: "postgres", Address: "127.0.0.1",
 		CPU: "0.0%", Memory: "2.2 MB", Dir: "~/Library/Application Support/Postgres/var-17"}}
-	m, _ := send(newModel(list, ports.List), tea.WindowSizeMsg{Height: 30})
+	m, _ := send(newModel(list, listTCP), tea.WindowSizeMsg{Height: 30})
 	view := m.View()
 	if !strings.Contains(view, "Postgres/var-17") || strings.Contains(view, "Application Support") {
 		t.Error("table should show only the last two path segments")

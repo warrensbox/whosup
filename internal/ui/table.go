@@ -342,7 +342,7 @@ const detailsValueWidth = 60
 // detailsFields lists every field of a row as label/value pairs.
 func detailsFields(p ports.Port) [][2]string {
 	return [][2]string{
-		{"Port", strconv.Itoa(p.Port)},
+		{"Port", p.Label()},
 		{"PID", strconv.Itoa(p.PID)},
 		{"Command", p.Command},
 		{"Address", describeAddress(p.Address)},
@@ -406,7 +406,7 @@ func (m model) tableView() string {
 	end := min(m.offset+m.height, len(m.list))
 	rows := make([][]string, 0, end-m.offset)
 	for _, p := range m.list[m.offset:end] {
-		rows = append(rows, []string{strconv.Itoa(p.Port), strconv.Itoa(p.PID), p.Command, p.Address, p.CPU, p.Memory, lastSegments(p.Dir, 2)})
+		rows = append(rows, []string{p.Label(), strconv.Itoa(p.PID), p.Command, p.Address, p.CPU, p.Memory, lastSegments(p.Dir, 2)})
 	}
 	t := table.New().
 		Border(lipgloss.RoundedBorder()).
